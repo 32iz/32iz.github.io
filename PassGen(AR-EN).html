@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Password Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            direction: ltr;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        label, select, input {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e8e8e8;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .password-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .password-list li {
+            margin-bottom: 10px;
+            background-color: #ddd;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .switch-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "EN";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: black;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            content: "ع";
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="switch-container">
+        <label class="switch">
+            <input type="checkbox" id="languageSwitch" checked onclick="toggleLanguage()">
+            <span class="slider"></span>
+        </label>
+    </div>
+    
+    <h2 id="title">Password Generator</h2>
+
+    <label for="socialMedia" id="labelSocialMedia">Enter Social Media Name:</label>
+	<input type="text" id="socialMedia" placeholder="Facebook">
+
+    <label for="personName" id="labelPersonName">Enter Your Name:</label>
+    <input type="text" id="personName" placeholder="Ahmed">
+
+    <button onclick="generatePasswords()" id="generateButton">Generate Passwords</button>
+
+    <div class="output">
+        <ul id="passwordList" class="password-list"></ul>
+    </div>
+</div>
+
+<script>
+    let isEnglish = false;
+
+    function getRandomSymbols() {
+        const symbols = "!&";
+        let result = "";
+        for (let i = 0; i < 2; i++) {
+            result += symbols.charAt(Math.floor(Math.random() * symbols.length));
+        }
+        return result;
+    }
+
+    function generateSinglePassword(personName, socialMedia) {
+        const firstTwoName = personName.substring(0, 2);
+        const firstTwoSocial = socialMedia.substring(0, 2);
+        const socialMediaLength = socialMedia.length;
+        const randomSymbols = getRandomSymbols();
+		const lowerFirstTwoSocial = firstTwoSocial.toLowerCase();
+        const upperFirstTwoSocial = firstTwoSocial.toUpperCase();
+
+        return firstTwoName + randomSymbols + lowerFirstTwoSocial + socialMediaLength + socialMediaLength + upperFirstTwoSocial;
+    }
+
+    function generatePasswords() {
+		const personName = document.getElementById("personName").value;
+		const socialMedia = document.getElementById("socialMedia").value;
+
+		if (personName.length < 2) {
+			alert(isEnglish ? "Please enter a valid name with at least 2 letters." : "الرجاء إدخال اسم صحيح يحتوي على حرفين على الأقل.");
+			return;
+		}
+
+		const passwordSet = new Set();
+		const passwordList = document.getElementById("passwordList");
+		passwordList.innerHTML = "";  // Clear previous passwords
+
+		let maxPossiblePasswords = 4;  // 2 symbols (!, &) = 4 unique combinations
+
+		while (passwordSet.size < maxPossiblePasswords) {
+			const password = generateSinglePassword(personName, socialMedia);
+			passwordSet.add(password);
+		}
+
+		passwordSet.forEach(password => {
+			const li = document.createElement("li");
+			li.textContent = password;
+			passwordList.appendChild(li);
+		});
+
+		//alert(isEnglish ? "All possible passwords have been generated." : "تم توليد جميع كلمات المرور الممكنة.");
+	}
+
+    function toggleLanguage() {
+        const languageSwitch = document.getElementById("languageSwitch");
+        isEnglish = !languageSwitch.checked;
+
+        if (!isEnglish) {
+            document.getElementById("title").textContent = "مولد كلمة المرور";
+            document.getElementById("labelSocialMedia").textContent = "أدخل اسم الشبكة الاجتماعية:";
+            document.getElementById("labelPersonName").textContent = "أدخل اسمك:";
+            document.getElementById("generateButton").textContent = "توليد كلمات المرور";
+            document.body.style.direction = "rtl";
+        } else {
+            document.getElementById("title").textContent = "Password Generator";
+            document.getElementById("labelSocialMedia").textContent = "Enter Social Media Name:";
+            document.getElementById("labelPersonName").textContent = "Enter Your Name:";
+            document.getElementById("generateButton").textContent = "Generate Passwords";
+            document.body.style.direction = "ltr";
+        }
+    }
+	window.onload = toggleLanguage;
+</script>
+
+</body>
+</html>
